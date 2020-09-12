@@ -1,8 +1,8 @@
-import { server as Server } from "./deps.ts";
+import { serve } from "https://deno.land/std/http/server.ts";
 
 const PORT = Deno.env.get("PORT");
 const port = typeof PORT === "undefined" ? 3000 : parseInt(PORT, 10);
-const server = Server.serve({ port });
+const server = serve({ port });
 
 console.log(`http://localhost:${port}/`);
 
