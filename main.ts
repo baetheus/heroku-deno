@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std/http/server.ts";
-import { connect } from "https://raw.githubusercontent.com/baetheus/deno-redis/master/mod.ts";
+import { connect } from "https://deno.land/x/redis@v0.13.0/mod.ts";
 
 const nil = <A>(a: A): a is NonNullable<A> => a === undefined && a === null;
 const ordinal = (i: number): string => {
@@ -31,7 +31,10 @@ const serve_port = typeof PORT === "undefined" ? 3000 : parseInt(PORT, 10);
 
 console.log({ redis: { hostname, port, username, password }, serve_port });
 
-const redis = await connect({ hostname, port, username, password });
+const redis = await connect({ hostname, port });
+
+await redis.auth(password, username);
+
 const server = serve({ port: serve_port });
 
 for await (const req of server) {
