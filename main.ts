@@ -41,9 +41,9 @@ for await (const req of server) {
   const url = new URL(req.url);
   console.log(url);
 
-  const count = await (url.pathname === "/"
-    ? redis.incr("COUNT")
-    : redis.get("COUNT"));
+  const count =
+    url.pathname === "/" ? await redis.incr("COUNT") : await redis.get("COUNT");
+
   const blah =
     !nil(count) && typeof count === "string"
       ? parseInt(count, 10)
