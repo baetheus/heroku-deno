@@ -25,11 +25,13 @@ if (nil(REDIS_URL)) {
   Deno.exit(1);
 }
 
-const port = typeof PORT === "undefined" ? 3000 : parseInt(PORT, 10);
-const redis = await connect(new URL(REDIS_URL as any));
-const server = serve({ port });
+const redis_url = new URL(REDIS_URL as any);
+const serve_port = typeof PORT === "undefined" ? 3000 : parseInt(PORT, 10);
 
-console.log(`http://localhost:${port}/`);
+console.log({ redis_url, serve_port });
+
+const redis = await connect(redis_url);
+const server = serve({ port: serve_port });
 
 for await (const req of server) {
   const count = await redis.incr("COUNT");
