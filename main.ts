@@ -38,8 +38,18 @@ await redis.auth(password);
 const server = serve({ port: serve_port });
 
 for await (const req of server) {
-  const count = await redis.incr("COUNT");
-  req.respond({
-    body: `This is the ${ordinal(count)} view.`,
+  const url = new URL(req.url);
+  console.log(url);
+
+  const count = await (url.pathname === "/"
+    ? redis.incr("COUNT")
+    : redis.get("COUNT"));
+  const blah =
+    !nil(count) && typeof count === "string"
+      ? parseInt(count, 10)
+      : (count as number);
+
+  await req.respond({
+    body: `This is the ${ordinal(blah)} view.`,
   });
 }
