@@ -33,7 +33,7 @@ console.log({ redis: { hostname, port, username, password }, serve_port });
 
 const redis = await connect({ hostname, port });
 
-await redis.auth(password, username);
+await redis.auth(password);
 
 const server = serve({ port: serve_port });
 
