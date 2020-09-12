@@ -1,6 +1,7 @@
 FROM hayd/alpine-deno:1.0.0
 
 EXPOSE $PORT
+EXPOSE $REDIS_URL
 
 WORKDIR /app
 

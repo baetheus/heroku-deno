@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std/http/server.ts";
-import { urlParse } from "https://deno.land/x/url_parse/mod.ts";
 import { connect } from "https://denopkg.com/keroxp/deno-redis/mod.ts";
 
 const nil = <A>(a: A): a is NonNullable<A> => a !== undefined && a !== null;
