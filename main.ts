@@ -38,11 +38,12 @@ await redis.auth(password);
 const server = serve({ port: serve_port });
 
 for await (const req of server) {
-  console.log(req);
-
-  const count = await redis.incr("COUNT");
-
-  await req.respond({
-    body: `This is the ${ordinal(count)} request.`,
-  });
+  if (req.url === "/") {
+    const count = await redis.incr("COUNT");
+    req.respond({
+      body: `This is the ${ordinal(count)} request.`,
+    });
+  } else {
+    req.respond({ status: 404 });
+  }
 }
