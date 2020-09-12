@@ -25,7 +25,8 @@ if (nil(REDIS_URL)) {
   Deno.exit(1);
 }
 
-const redis_url = new URL(REDIS_URL as any);
+const mucked_url = ((REDIS_URL as any) as string).replace(/^redis/, "http");
+const redis_url = new URL(mucked_url);
 const serve_port = typeof PORT === "undefined" ? 3000 : parseInt(PORT, 10);
 
 console.log({ redis_url, serve_port });
