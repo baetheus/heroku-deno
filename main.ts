@@ -41,7 +41,7 @@ for await (const req of server) {
   if (req.url === "/") {
     const count = await redis.incr("COUNT");
     req.respond({
-      body: `This is the ${ordinal(count)} request.`,
+      body: `This is the ${ordinal(count)} request. Hi Josh!`,
     });
   } else {
     req.respond({ status: 404 });
