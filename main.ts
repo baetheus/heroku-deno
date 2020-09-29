@@ -22,7 +22,7 @@ console.log({ redis: { hostname, port, username, password }, serve_port });
 
 const redis = await connect({ hostname, port });
 
-await redis.auth("asdf");
+// await redis.auth(password);
 
 const server = serve({ port: serve_port });
 
