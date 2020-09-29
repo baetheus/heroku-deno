@@ -1,4 +1,4 @@
-FROM hayd/alpine-deno:1.0.0
+FROM hayd/alpine-deno:1.4.2
 
 EXPOSE $PORT
 EXPOSE $REDIS_URL
