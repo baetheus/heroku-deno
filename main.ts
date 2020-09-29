@@ -22,7 +22,7 @@ console.log({ redis: { hostname, port, username, password }, serve_port });
 
 const redis = await connect({ hostname, port });
 
-// await redis.auth(password);
+await redis.auth(password);
 
 const server = serve({ port: serve_port });
 
@@ -32,12 +32,7 @@ const server = serve({ port: serve_port });
 const rootHandler = pipe(
   S.status(S.Status.OK),
   S.ichain(() => S.closeHeaders()),
-  S.ichain(() =>
-    S.tryCatch(
-      () => redis.incr("COUNT"),
-      () => "Unable to access REDIS"
-    )
-  ),
+  S.ichain(() => S.rightTask(() => redis.incr("COUNT"))),
   S.ichain((count) => S.send(`Hello, you are person number ${count}.`)),
   S.orElse(S.send)
 );
