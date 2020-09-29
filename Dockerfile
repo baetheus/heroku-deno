@@ -7,6 +7,6 @@ WORKDIR /app
 
 ADD . .
 
-RUN deno cache -L debug main.ts
+RUN deno cache main.ts
 
 CMD ["run", "--allow-env", "--allow-net", "main.ts"]
