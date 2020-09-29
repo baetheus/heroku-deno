@@ -1,21 +1,10 @@
 import { serve } from "https://deno.land/std/http/server.ts";
 import { connect } from "https://deno.land/x/redis@v0.13.0/mod.ts";
+import { use } from "https://deno.land/x/sedate@v0.0.2/deno_handler.ts";
+import * as S from "https://deno.land/x/sedate@v0.0.2/sedate.ts";
+import { pipe } from "https://deno.land/x/hkts@v0.0.15/fns.ts";
 
 const nil = <A>(a: A): a is NonNullable<A> => a === undefined && a === null;
-const ordinal = (i: number): string => {
-  var j = i % 10,
-    k = i % 100;
-  if (j == 1 && k != 11) {
-    return i + "st";
-  }
-  if (j == 2 && k != 12) {
-    return i + "nd";
-  }
-  if (j == 3 && k != 13) {
-    return i + "rd";
-  }
-  return i + "th";
-};
 
 const PORT = Deno.env.get("PORT");
 const REDIS_URL = Deno.env.get("REDIS_URL");
@@ -37,12 +26,19 @@ await redis.auth(password);
 
 const server = serve({ port: serve_port });
 
+/**
+ * Middleware!?!?!
+ */
+const rootHandler = pipe(
+  S.status(S.Status.OK),
+  S.ichain(() => S.closeHeaders()),
+  S.ichain(() => S.rightTask(() => redis.incr("COUNT"))),
+  S.ichain((count) => S.send(`Hello, you are person number ${count}.`))
+);
+
 for await (const req of server) {
   if (req.url === "/") {
-    const count = await redis.incr("COUNT");
-    req.respond({
-      body: `This is the ${ordinal(count)} request. Hi Josh!`,
-    });
+    await use(rootHandler)(req);
   } else {
     req.respond({ status: 404 });
   }
