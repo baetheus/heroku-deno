@@ -61,7 +61,7 @@ const page = (count: string | number) => {
  */
 const rootHandler = pipe(
   S.status(S.Status.OK),
-  S.ichain(() => S.header("Content-Type", "text/html")),
+  S.ichain(() => S.header("Content-Type", "text/html; charset=UTF-8")),
   S.ichain(() => S.closeHeaders()),
   S.ichain(() => S.rightTask(() => redis.incr("COUNT"))),
   S.ichain((count) => S.send(page(count))),
