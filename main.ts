@@ -43,25 +43,28 @@ const server = serve({ port: serve_port });
 /**
  * Template
  */
-const page = (body: string) => html`<html>
+const page = (count: string | number) => {
+  return html`<html>
 
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>heroku-deno</title>
 </head>
 
-<body>${body}</body>
+<body><h1>Hello, you are person number ${count}</h1></body>
 
-</html>`;
+</html>`
+};
 
 /**
  * Middleware!?!?!
  */
 const rootHandler = pipe(
   S.status(S.Status.OK),
+  S.ichain(() => S.header("Content-Type", "text/html")),
   S.ichain(() => S.closeHeaders()),
   S.ichain(() => S.rightTask(() => redis.incr("COUNT"))),
-  S.ichain((count) => S.send(page(html`<h1>Hello, you are person number ${count}.</h1>`))),
+  S.ichain((count) => S.send(page(count))),
   S.orElse(S.send)
 );
 
