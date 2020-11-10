@@ -8,6 +8,8 @@ import { pipe } from "https://deno.land/x/hkts@v0.0.30/fns.ts";
 import * as D from 'https://deno.land/x/hkts@v0.0.30/decoder.ts';
 import * as E from 'https://deno.land/x/hkts@v0.0.30/either.ts';
 
+import { html } from 'https://deno.land/x/html/mod.ts';
+
 /**
  * Environmental Settings Decoder
  */
@@ -39,13 +41,27 @@ await redis.auth(redis_url.password);
 const server = serve({ port: serve_port });
 
 /**
+ * Template
+ */
+const page = (body: string) => html`<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>heroku-deno</title>
+</head>
+
+<body>${body}</body>
+
+</html>`;
+
+/**
  * Middleware!?!?!
  */
 const rootHandler = pipe(
   S.status(S.Status.OK),
   S.ichain(() => S.closeHeaders()),
   S.ichain(() => S.rightTask(() => redis.incr("COUNT"))),
-  S.ichain((count) => S.send(`Hello, you are person number ${count}.`)),
+  S.ichain((count) => S.send(page(html`<h1>Hello, you are person number ${count}.</h1>`))),
   S.orElse(S.send)
 );
 
