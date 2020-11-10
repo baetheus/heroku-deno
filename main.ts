@@ -1,29 +1,41 @@
-import { serve } from "https://deno.land/std/http/server.ts";
+import { serve } from "https://deno.land/std@0.71.0/http/mod.ts";
 import { connect } from "https://deno.land/x/redis@v0.13.0/mod.ts";
+
 import { use } from "https://deno.land/x/sedate@v0.0.2/deno_handler.ts";
 import * as S from "https://deno.land/x/sedate@v0.0.2/sedate.ts";
-import { pipe } from "https://deno.land/x/hkts@v0.0.15/fns.ts";
 
-const nil = <A>(a: A): a is NonNullable<A> => a === undefined && a === null;
+import { pipe } from "https://deno.land/x/hkts@v0.0.30/fns.ts";
+import * as D from 'https://deno.land/x/hkts@v0.0.30/decoder.ts';
+import * as E from 'https://deno.land/x/hkts@v0.0.30/either.ts';
 
-const PORT = Deno.env.get("PORT");
-const REDIS_URL = Deno.env.get("REDIS_URL");
+/**
+ * Environmental Settings Decoder
+ */
+const Settings = D.type({
+  PORT: D.string,
+  REDIS_URL: D.string,
+});
 
-if (nil(REDIS_URL)) {
-  console.error("Cannot start app without REDIS_URL");
-  Deno.exit(1);
-}
+/**
+ * Parsed Environmental Settings
+ */
+const { REDIS_URL, PORT } = pipe(
+  Settings.decode(Deno.env.toObject()),
+  E.getOrElse(() => ({ PORT: "5000", REDIS_URL: "redis://localhost:6379"}))
+);
 
-const mucked_url = ((REDIS_URL as any) as string).replace(/^redis/, "http");
-const { hostname, port, username, password } = new URL(mucked_url);
+const redis_url = new URL(REDIS_URL.replace(/^redis/, "http"));
 const serve_port = typeof PORT === "undefined" ? 3000 : parseInt(PORT, 10);
 
-console.log({ redis: { hostname, port, username, password }, serve_port });
+/**
+ * Redis Connection
+ */
+const redis = await connect({ hostname: redis_url.hostname, port: redis_url.port });
+await redis.auth(redis_url.password);
 
-const redis = await connect({ hostname, port });
-
-await redis.auth(password);
-
+/**
+ * Http Server
+ */
 const server = serve({ port: serve_port });
 
 /**
@@ -37,6 +49,9 @@ const rootHandler = pipe(
   S.orElse(S.send)
 );
 
+/**
+ * Handle Requests
+ */
 for await (const req of server) {
   if (req.url === "/") {
     await use(rootHandler)(req);
